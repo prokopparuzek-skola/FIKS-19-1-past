@@ -47,6 +47,7 @@ func main() {
 		var N int
 		var ans int = 1
 		fmt.Scan(&N)
+		//fmt.Fprintln(os.Stderr, N)
 		if N > LIMIT {
 			for j := 0; j <= T-i; j++ {
 				fmt.Println("O velky Tung")
