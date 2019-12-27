@@ -1,24 +1,28 @@
 package main
 
 import "fmt"
-
-const MAX = 1e6
+import "math"
 
 func main() {
+	MAX := int(math.Pow(2, 27))
 	var sito []bool
+	var i uint64
+	var t bool
 	sito = make([]bool, MAX)
 	sito[0] = true
-	for i, t := range sito {
+	for i = 0; i < uint64(len(sito)); i++ {
+		t = sito[i]
 		n := i + 1
-		i += n
+		j := i + n
 		if !t {
-			for i < len(sito) {
-				sito[i] = true
-				i += n
+			for j < uint64(len(sito)) {
+				sito[j] = true
+				j += n
 			}
 		}
 	}
-	for i, t := range sito {
+	for i = 0; i < uint64(len(sito)); i++ {
+		t = sito[i]
 		if !t {
 			fmt.Printf("%d\n", i+1)
 		}
