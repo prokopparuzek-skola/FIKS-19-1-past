@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-const MAX = 1e6
+const MAX = 1e4
 
 func main() {
 	var sito []bool
