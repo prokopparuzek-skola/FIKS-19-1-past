@@ -5,10 +5,22 @@ import "fmt"
 import "os"
 import "io"
 import "math"
+import "math/rand"
+import "time"
 
 const FILE = "prvocisla/primes.txt"
 const LIMIT = 1152921504606846976 // 2^60
-const ACC = 3
+const ACC = 10
+
+func random(n uint) (r uint) {
+	for {
+		r = uint(rand.Uint64()) % (n - 2)
+		if r > 2 {
+			break
+		}
+	}
+	return
+}
 
 func isPrime(n uint, isPrimeArray map[uint]bool) bool {
 	if n == 1 {
@@ -39,15 +51,12 @@ func isPrimeProbably(n uint, isPrimeArray map[uint]bool) bool {
 		return false
 	}
 
-	var test bool
-	for i := uint(2); i < 2+ACC; i++ {
-		if uint(math.Pow(float64(i), float64(n-1)))%n == 1 {
-			test = true
-		} else {
-			test = false
+	for i := 0; i < ACC; i++ {
+		if uint(math.Pow(float64(random(n)), float64(n-1)))%n != 1 {
+			return false
 		}
 	}
-	return test
+	return true
 }
 
 func main() {
@@ -57,6 +66,7 @@ func main() {
 	var isPrimeArray map[uint]bool
 	var err error
 	var buf uint
+	rand.Seed(time.Now().Unix())
 
 	fmt.Scanf("%d", &T)
 	file, _ = os.Open(FILE)
@@ -73,7 +83,7 @@ func main() {
 		var ans uint = 1
 		fmt.Scan(&N)
 		//fmt.Fprintln(os.Stderr, N)
-		if N >= LIMIT {
+		if N > LIMIT || N == 0 {
 			for j := uint(0); j <= T-i; j++ {
 				fmt.Println("O velky Tung")
 			}
