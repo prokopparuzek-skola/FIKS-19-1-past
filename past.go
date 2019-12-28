@@ -7,55 +7,80 @@ import "io"
 import "math"
 
 const FILE = "prvocisla/primes.txt"
-const ODM = int(1e4)
-const LIMIT = 1e12
+const LIMIT = 1152921504606846976 // 2^60
+const ACC = 3
 
-func isPrime(n int, isPrimeArray map[int]bool) bool {
+func isPrime(n uint, isPrimeArray map[uint]bool) bool {
 	if n == 1 {
 		return false
 	}
 	if isPrimeArray[n] == true {
 		return true
 	}
-	for i := 2; i <= int(math.Sqrt(float64(n))); i++ {
-		if n%i == 0 {
+	if n%2 == 0 || n%3 == 0 {
+		return false
+	}
+	for i := uint(134217725); i*i <= n; i += 6 {
+		if n%i == 0 || n%(i+2) == 0 {
 			return false
 		}
 	}
 	return true
 }
 
+func isPrimeProbably(n uint, isPrimeArray map[uint]bool) bool {
+	if n == 1 {
+		return false
+	}
+	if isPrimeArray[n] == true {
+		return true
+	}
+	if n%2 == 0 || n%3 == 0 {
+		return false
+	}
+
+	var test bool
+	for i := uint(2); i < 2+ACC; i++ {
+		if uint(math.Pow(float64(i), float64(n-1)))%n == 1 {
+			test = true
+		} else {
+			test = false
+		}
+	}
+	return test
+}
+
 func main() {
 	var file *os.File
-	var T int
-	var primes []int
-	var isPrimeArray map[int]bool
+	var T uint
+	var primes []uint
+	var isPrimeArray map[uint]bool
 	var err error
-	var buf int
+	var buf uint
 
 	fmt.Scanf("%d", &T)
 	file, _ = os.Open(FILE)
-	primes = make([]int, 0)
-	isPrimeArray = make(map[int]bool)
+	primes = make([]uint, 0)
+	isPrimeArray = make(map[uint]bool)
 	for err != io.EOF {
 		_, err = fmt.Fscanf(file, "%d", &buf)
 		primes = append(primes, buf)
 		isPrimeArray[buf] = true
 	}
 
-	for i := 1; i <= T; i++ {
-		var N int
-		var ans int = 1
+	for i := uint(1); i <= T; i++ {
+		var N uint
+		var ans uint = 1
 		fmt.Scan(&N)
 		//fmt.Fprintln(os.Stderr, N)
-		if N > LIMIT {
-			for j := 0; j <= T-i; j++ {
+		if N >= LIMIT {
+			for j := uint(0); j <= T-i; j++ {
 				fmt.Println("O velky Tung")
 			}
 			return
 		}
-		for j := 0; int(math.Pow(float64(primes[j]), float64(3))) <= N; j++ {
-			cnt := 1
+		for j := uint(0); uint(math.Pow(float64(primes[j]), float64(3))) <= N; j++ {
+			cnt := uint(1)
 			for N%primes[j] == 0 {
 				N /= primes[j]
 				cnt++
@@ -65,10 +90,10 @@ func main() {
 				break
 			}
 		}
-		if isPrime(N, isPrimeArray) {
+		if isPrimeProbably(N, isPrimeArray) {
 			ans *= 2
 		} else if math.Sqrt(float64(N))-float64(int(math.Sqrt(float64(N)))) == 0 {
-			if isPrime(int(math.Sqrt(float64(N))), isPrimeArray) {
+			if isPrimeProbably(uint(math.Sqrt(float64(N))), isPrimeArray) {
 				ans *= 3
 			}
 		} else if N != 1 {
