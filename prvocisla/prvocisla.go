@@ -1,10 +1,9 @@
 package main
 
 import "fmt"
-import "math"
 
 func main() {
-	MAX := int(math.Pow(2, 27))
+	MAX := 106528682
 	var sito []bool
 	var i uint64
 	var t bool
