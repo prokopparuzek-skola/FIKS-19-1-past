@@ -1,14 +1,16 @@
 // https://www.geeksforgeeks.org/count-divisors-n-on13/
 package main
 
-import "fmt"
-import "os"
-import "io"
-import "math"
-import "math/rand"
-import "time"
-import "os/exec"
-import "strings"
+import (
+	"fmt"
+	"io"
+	"math/big"
+	"math/rand"
+	"os"
+	"os/exec"
+	"strings"
+	"time"
+)
 
 const FILE = "prvocisla/primes.txt"
 const LIMIT = 1152921504606846976 // 2^60
@@ -70,61 +72,63 @@ func main() {
 	var file *os.File
 	var T uint
 	var primes []uint
-	var isPrimeArray map[uint]bool
 	var err error
-	var buf uint
+	var buf *big.Int
 	rand.Seed(time.Now().Unix())
 
 	fmt.Scanf("%d", &T)
 	file, _ = os.Open(FILE)
 	primes = make([]uint, 0)
-	isPrimeArray = make(map[uint]bool)
 	for {
-		_, err = fmt.Fscanf(file, "%d", &buf)
+		_, err = fmt.Fscan(file, &buf)
+		fmt.Println(buf)
 		if err == io.EOF {
 			break
 		}
-		primes = append(primes, buf)
-		isPrimeArray[buf] = true
+		primes = append(primes, uint(buf.Int64()))
 	}
 
 	for i := uint(1); i <= T; i++ {
-		var N uint
-		var ans uint = 1
+		var N *big.Int
+		var ans *big.Int = big.NewInt(1)
 		fmt.Scanf("%d", &N)
 		//fmt.Fprintln(os.Stderr, N)
-		if N > LIMIT || N == 0 {
+		if N.Cmp(big.NewInt(LIMIT)) == 1 || N.Cmp(&big.Int{}) == 0 {
 			for j := uint(0); j <= T-i; j++ {
 				fmt.Println("O velky Tung")
 			}
 			return
 		}
-		for j := uint(0); primes[j]*primes[j]*primes[j] <= N; j++ {
+		for j := uint(0); big.NewInt(0).Exp(big.NewInt(int64(primes[j])), big.NewInt(3), nil).Cmp(N) <= 0; j++ {
 			cnt := uint(1)
-			for N%primes[j] == 0 {
+			for big.NewInt(0).Cmp(big.NewInt(0).Mod(N, big.NewInt(int64(primes[j])))) == 0 {
 				//fmt.Fprintln(os.Stderr, primes[j])
-				N /= primes[j]
+				N.Div(N, big.NewInt(int64(primes[j])))
 				cnt++
 				//fmt.Fprintf(os.Stderr, "%d:%v\n", N, isPrimeArray[N])
 			}
-			ans *= cnt
-			if isPrimeArray[N] {
+			ans.Mul(ans, big.NewInt(int64(cnt)))
+			if N.ProbablyPrime(ACC) {
 				break
 			}
 		}
-		if isPrimeProbably(N, &isPrimeArray) {
-			ans *= 2
+		if N.ProbablyPrime(ACC) {
+			ans.Mul(ans, big.NewInt(2))
 			//fmt.Fprintln(os.Stderr, "Prime")
-		} else if math.Sqrt(float64(N))-float64(int(math.Sqrt(float64(N)))) == 0 {
-			if isPrime(uint(math.Sqrt(float64(N))), &isPrimeArray) {
-				ans *= 3
+		} else if big.NewFloat(0).Sqrt(big.NewFloat(0).SetInt(N)).IsInt() {
+			var pow *big.Float
+			var Ipow *big.Int
+			pow.Sqrt(big.NewFloat(0).SetInt(N)).Int(nil)
+			Ipow, _ = pow.Int(nil)
+			if Ipow.ProbablyPrime(ACC) {
+				ans.Mul(ans, big.NewInt(3))
 				//fmt.Fprintln(os.Stderr, "PrimePow")
 			}
-		} else if N != 1 {
-			ans *= 4
+		} else if N.Cmp(big.NewInt(1)) != 0 {
+			ans.Mul(ans, big.NewInt(4))
 			//fmt.Fprintln(os.Stderr, "Multi")
 		}
-		ans--
+		ans.Sub(ans, big.NewInt(1))
 		fmt.Println(ans)
 	}
 }
